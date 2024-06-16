@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>リアルタイム更新デモ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="left-pane">
+            <h2>カテゴリ A</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>選択</th>
+                        <th>名称</th>
+                        <th>点数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items_a %}
+                    <tr>
+                        <td><input type="checkbox" id="checkbox{{ item[0] }}" class="info-checkbox"></td>
+                        <td>{{ item[1] }}</td>
+                        <td>{{ item[2] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <h2>カテゴリ B</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>選択</th>
+                        <th>名称</th>
+                        <th>点数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items_b %}
+                    <tr>
+                        <td><input type="checkbox" id="checkbox{{ item[0] }}" class="info-checkbox"></td>
+                        <td>{{ item[1] }}</td>
+                        <td>{{ item[2] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <h2>カテゴリ C</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>選択</th>
+                        <th>名称</th>
+                        <th>点数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items_c %}
+                    <tr>
+                        <td><input type="checkbox" id="checkbox{{ item[0] }}" class="info-checkbox"></td>
+                        <td>{{ item[1] }}</td>
+                        <td>{{ item[2] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="right-pane">
+            <h2>選択されたアイテムの情報と点数</h2>
+            <div id="info-score-display"></div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            $('.info-checkbox').change(function(){
+                let selectedIds = $('.info-checkbox:checked').map(function(){
+                    return this.id;
+                }).get();
+
+                $.ajax({
+                    url: '/get_info_and_scores',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ selected_ids: selectedIds }),
+                    success: function(data) {
+                        let infoScoreHtml = '';
+                        data.forEach(function(item) {
+                            infoScoreHtml += `<div class="info-item">
+                                                <div class="info-score">
+                                                    <div class="info">${item.info}</div>
+                                                    <div class="score">${item.score} 点</div>
+                                                </div>
+                                              </div>`;
+                        });
+                        $('#info-score-display').html(infoScoreHtml);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
