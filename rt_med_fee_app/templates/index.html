@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask AJAX Example</title>
+    <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
+</head>
+<body>
+    <h1>リアルタイム更新の例</h1>
+    <label>
+        <input type="checkbox" id="checkbox"> チェックボックス
+    </label>
+    <p id="response"></p>
+    
+    <script>
+        $(document).ready(function() {
+            $('#checkbox').change(function() {
+                var isChecked = $(this).is(':checked');
+                
+                $.ajax({
+                    url: '/update',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({checkbox: isChecked}),
+                    success: function(response) {
+                        $('#response').text(response.message);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
