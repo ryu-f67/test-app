@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Application</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>CRUD Application</h1>
+            <form id="record-form">
+                <input type="hidden" id="record-id" name="record-id">
+                <label for="category">Category:</label>
+                <select id="category" name="category">
+                    <option value="Option1">Option1</option>
+                    <option value="Option2">Option2</option>
+                    <option value="Option3">Option3</option>
+                </select><br>
+                <label for="amount">Amount:</label>
+                <input type="number" id="amount" name="amount"><br>
+                <label for="description">Description:</label>
+                <input type="text" id="description" name="description"><br>
+                <label for="notes">Notes:</label>
+                <input type="text" id="notes" name="notes"><br>
+                <button type="submit">Save</button>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <h2>Records</h2>
+            <table id="records-table" border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            function loadRecords() {
+                $.get('/api/records', function(data) {
+                    $('#records-table tbody').empty();
+                    data.forEach(record => {
+                        $('#records-table tbody').append(`
+                            <tr>
+                                <td>${record[0]}</td>
+                                <td>${record[1]}</td>
+                                <td>${record[2]}</td>
+                                <td>${record[3]}</td>
+                                <td>${record[4]}</td>
+                                <td>
+                                    <button class="edit" data-id="${record[0]}" data-category="${record[1]}" data-amount="${record[2]}" data-description="${record[3]}" data-notes="${record[4]}">Edit</button>
+                                    <button class="delete" data-id="${record[0]}">Delete</button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+                });
+            }
+
+            loadRecords();
+
+            $('#record-form').on('submit', function(event) {
+                event.preventDefault();
+                const recordId = $('#record-id').val();
+                const record = {
+                    category: $('#category').val(),
+                    amount: $('#amount').val(),
+                    description: $('#description').val(),
+                    notes: $('#notes').val()
+                };
+                if (recordId) {
+                    // Edit existing record
+                    $.ajax({
+                        url: `/api/records/${recordId}`,
+                        method: 'PUT',
+                        contentType: 'application/json',
+                        data: JSON.stringify(record),
+                        success: function() {
+                            loadRecords();
+                            $('#record-form')[0].reset();
+                            $('#record-id').val('');
+                        }
+                    });
+                } else {
+                    // Add new record
+                    $.ajax({
+                        url: '/api/records',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(record),
+                        success: function() {
+                            loadRecords();
+                            $('#record-form')[0].reset();
+                        }
+                    });
+                }
+            });
+
+            $(document).on('click', '.edit', function() {
+                const id = $(this).data('id');
+                const category = $(this).data('category');
+                const amount = $(this).data('amount');
+                const description = $(this).data('description');
+                const notes = $(this).data('notes');
+
+                $('#record-id').val(id);
+                $('#category').val(category);
+                $('#amount').val(amount);
+                $('#description').val(description);
+                $('#notes').val(notes);
+            });
+
+            $(document).on('click', '.delete', function() {
+                const id = $(this).data('id');
+                $.ajax({
+                    url: `/api/records/${id}`,
+                    method: 'DELETE',
+                    success: function() {
+                        loadRecords();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
