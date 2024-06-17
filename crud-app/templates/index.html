@@ -31,6 +31,19 @@
 
         <div class="table-container">
             <h2>Records</h2>
+            <div class="filter-container">
+                <label for="filter-category">Filter by Category:</label>
+                <select id="filter-category">
+                    <option value="">All</option>
+                    <option value="Option1">Option1</option>
+                    <option value="Option2">Option2</option>
+                    <option value="Option3">Option3</option>
+                </select>
+                <label for="filter-description">Filter by Description:</label>
+                <input type="text" id="filter-description" placeholder="Enter description">
+                <button id="filter-button">Filter</button>
+                <button id="reset-button">Reset</button>
+            </div>
             <table id="records-table" border="1">
                 <thead>
                     <tr>
@@ -49,10 +62,20 @@
 
     <script>
         $(document).ready(function() {
-            function loadRecords() {
+            function loadRecords(filters = {}) {
                 $.get('/api/records', function(data) {
+                    let filteredData = data;
+
+                    if (filters.category) {
+                        filteredData = filteredData.filter(record => record[1] === filters.category);
+                    }
+
+                    if (filters.description) {
+                        filteredData = filteredData.filter(record => record[3].toLowerCase().includes(filters.description.toLowerCase()));
+                    }
+
                     $('#records-table tbody').empty();
-                    data.forEach(record => {
+                    filteredData.forEach(record => {
                         $('#records-table tbody').append(`
                             <tr>
                                 <td>${record[0]}</td>
@@ -82,7 +105,6 @@
                     notes: $('#notes').val()
                 };
                 if (recordId) {
-                    // Edit existing record
                     $.ajax({
                         url: `/api/records/${recordId}`,
                         method: 'PUT',
@@ -95,7 +117,6 @@
                         }
                     });
                 } else {
-                    // Add new record
                     $.ajax({
                         url: '/api/records',
                         method: 'POST',
@@ -132,6 +153,19 @@
                         loadRecords();
                     }
                 });
+            });
+
+            $('#filter-button').on('click', function() {
+                const category = $('#filter-category').val();
+                const description = $('#filter-description').val();
+                const filters = { category, description };
+                loadRecords(filters);
+            });
+
+            $('#reset-button').on('click', function() {
+                $('#filter-category').val('');
+                $('#filter-description').val('');
+                loadRecords();
             });
         });
     </script>

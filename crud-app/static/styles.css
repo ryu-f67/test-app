@@ -12,7 +12,7 @@ body {
 }
 
 .form-container {
-    width: 30%; /* Slightly reduce the width */
+    width: 30%; /* Set the width to 30% */
     padding: 20px;
     background-color: #f4f4f9;
     position: fixed;
@@ -22,7 +22,7 @@ body {
 }
 
 .table-container {
-    width: 65%; /* Increase the width accordingly */
+    width: 65%; /* Set the width to 65% */
     margin-left: 35%; /* Adjust the margin to match the form's width */
     padding: 20px;
 }
