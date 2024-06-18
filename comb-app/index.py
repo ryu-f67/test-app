@@ -10,23 +10,23 @@ def get_db():
     return conn
 
 # データベースからアイテムをカテゴリごとに取得
-def get_items_by_category(category):
+def get_records_by_category(category):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('SELECT id, name, point FROM items WHERE category = ?', (category,))
-    items = cursor.fetchall()
+    cursor.execute('SELECT id, name, point FROM records WHERE category = ?', (category,))
+    records = cursor.fetchall()
     conn.close()
-    return items
+    return records
 
 # チェックボックスに対応する情報を保持
 info_data = {f"checkbox{i}": f"情報{i}" for i in range(1, 31)}
 
 @app.route('/')
 def index():
-    items_a = get_items_by_category('A')
-    items_b = get_items_by_category('B')
-    items_c = get_items_by_category('C')
-    return render_template('index.html', items_a=items_a, items_b=items_b, items_c=items_c)
+    records_a = get_records_by_category('照射方法')
+    records_b = get_records_by_category('加算')
+    records_c = get_records_by_category('管理')
+    return render_template('index.html', records_a=records_a, records_b=records_b, records_c=records_c)
 
 @app.route('/get_info_and_scores', methods=['POST'])
 def get_info_and_scores():
@@ -35,9 +35,9 @@ def get_info_and_scores():
     cursor = conn.cursor()
     info_scores = []
     for item_id in selected_ids:
-        cursor.execute('SELECT name, score FROM items WHERE id = ?', (int(item_id[8:]),))  # checkbox の id から id を取得
-        name, score = cursor.fetchone()
-        info_scores.append({"info": name, "score": score})
+        cursor.execute('SELECT name, point FROM records WHERE id = ?', (int(item_id[8:]),))  # checkbox の id から id を取得
+        name, point = cursor.fetchone()
+        info_scores.append({"info": name, "point": point})
     conn.close()
     return jsonify(info_scores)
 

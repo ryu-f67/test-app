@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD Application</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>一覧/追加</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='database_styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='jquery-ui.min.css') }}">
     <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='jquery-ui.min.js') }}"></script>
@@ -12,59 +12,57 @@
 <body>
     <nav class="navbar">
         <div class="navbar-container">
-            <a href="#" class="navbar-brand">CRUD App</a>
+            <a href="#" class="navbar-brand">一覧/追加</a>
             <ul class="navbar-menu">
-                <li><a href="#">Home</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Contact</a></li>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('database_list') }}">Database</a></li>
+                <li><a href="#">その他</a></li>
             </ul>
         </div>
     </nav>
 
     <div class="container">
         <div class="form-container">
-            <h1>CRUD Application</h1>
+            <h1>診療報酬登録</h1>
             <form id="record-form">
                 <input type="hidden" id="record-id" name="record-id">
-                <label for="category">Category:</label>
+                <label for="name">名称:</label>
+                <input type="text" id="name" name="name"><br>
+                <label for="category">分類:</label>
                 <select id="category" name="category">
-                    <option value="Option1">Option1</option>
-                    <option value="Option2">Option2</option>
-                    <option value="Option3">Option3</option>
+                    <option value="照射方法">照射方法</option>
+                    <option value="加算">加算</option>
+                    <option value="管理">管理</option>
                 </select><br>
-                <label for="amount">Amount:</label>
-                <input type="number" id="amount" name="amount"><br>
-                <label for="description">Description:</label>
-                <input type="text" id="description" name="description"><br>
-                <label for="notes">Notes:</label>
-                <input type="text" id="notes" name="notes"><br>
+                <label for="point">点数:</label>
+                <input type="number" id="point" name="point"><br>
                 <button type="submit">Save</button>
             </form>
         </div>
 
         <div class="table-container">
-            <h2>Records</h2>
+            <h2>診療報酬一覧</h2>
             <div class="filter-container">
                 <label for="filter-category">Filter by Category:</label>
                 <select id="filter-category">
                     <option value="">All</option>
-                    <option value="Option1">Option1</option>
-                    <option value="Option2">Option2</option>
-                    <option value="Option3">Option3</option>
+                    <option value="照射方法">照射方法</option>
+                    <option value="加算">加算</option>
+                    <option value="管理">管理</option>
                 </select>
-                <label for="filter-description">Filter by Description:</label>
-                <input type="text" id="filter-description" placeholder="Enter description">
+                <label for="filter-name">Filter by Name:</label>
+                <input type="text" id="filter-name" placeholder="Enter name">
                 <button id="filter-button">Filter</button>
                 <button id="reset-button">Reset</button>
             </div>
             <table id="records-table" border="1">
                 <thead>
                     <tr>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>Description</th>
-                        <th>Notes</th>
-                        <th>Actions</th>
+                        <th class="th-name">名称</th>
+                        <th class="th-category">分類</th>
+                        <th class="th-point">点数</th>
+                        <th class="th-update_time">最終更新日時</th>
+                        <th class="th-action">Actions</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -78,12 +76,12 @@
                 $.get('/api/records', function(data) {
                     let filteredData = data;
 
-                    if (filters.category) {
-                        filteredData = filteredData.filter(record => record[1] === filters.category);
+                    if (filters.name) {
+                        filteredData = filteredData.filter(record => record[1].toLowerCase().includes(filters.name.toLowerCase()));
                     }
 
-                    if (filters.description) {
-                        filteredData = filteredData.filter(record => record[3].toLowerCase().includes(filters.description.toLowerCase()));
+                    if (filters.category) {
+                        filteredData = filteredData.filter(record => record[2] === filters.category);
                     }
 
                     $('#records-table tbody').empty();
@@ -95,7 +93,7 @@
                                 <td>${record[3]}</td>
                                 <td>${record[4]}</td>
                                 <td>
-                                    <button class="edit" data-id="${record[0]}" data-category="${record[1]}" data-amount="${record[2]}" data-description="${record[3]}" data-notes="${record[4]}">Edit</button>
+                                    <button class="edit" data-id="${record[0]}" data-name="${record[1]}" data-category="${record[2]}" data-point="${record[3]}" data-update_time="${record[4]}">Edit</button>
                                     <button class="delete" data-id="${record[0]}">Delete</button>
                                 </td>
                             </tr>
@@ -134,10 +132,10 @@
                 event.preventDefault();
                 const recordId = $('#record-id').val();
                 const record = {
+                    name: $('#name').val(),
                     category: $('#category').val(),
-                    amount: $('#amount').val(),
-                    description: $('#description').val(),
-                    notes: $('#notes').val()
+                    point: $('#point').val(),
+                    //update_time: $('#update_time').val()
                 };
                 if (recordId) {
                     $.ajax({
@@ -167,16 +165,16 @@
 
             $(document).on('click', '.edit', function() {
                 const id = $(this).data('id');
+                const name = $(this).data('name');
                 const category = $(this).data('category');
-                const amount = $(this).data('amount');
-                const description = $(this).data('description');
-                const notes = $(this).data('notes');
+                const point = $(this).data('point');
+                //const update_time = $(this).data('update_time');
 
                 $('#record-id').val(id);
+                $('#name').val(name);
                 $('#category').val(category);
-                $('#amount').val(amount);
-                $('#description').val(description);
-                $('#notes').val(notes);
+                $('#point').val(point);
+                //$('#update_time').val(update_time);
             });
 
             $(document).on('click', '.delete', function() {
@@ -192,14 +190,14 @@
 
             $('#filter-button').on('click', function() {
                 const category = $('#filter-category').val();
-                const description = $('#filter-description').val();
-                const filters = { category, description };
+                const name = $('#filter-name').val();
+                const filters = { category, name };
                 loadRecords(filters);
             });
 
             $('#reset-button').on('click', function() {
                 $('#filter-category').val('');
-                $('#filter-description').val('');
+                $('#filter-name').val('');
                 loadRecords();
             });
         });

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>計算</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index_styles.css') }}">
+    <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="#" class="navbar-brand">計算</a>
+            <ul class="navbar-menu">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('database_list') }}">Database</a></li>
+                <li><a href="#">その他</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="left-pane">
+            <div class="left-pane-inner">
+                <h2>照射方法</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="th-checkbox">選択</th>
+                            <th class="th-name">名称</th>
+                            <th class="th-point">点数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records_a %}
+                        <tr>
+                            <td class="td-checkbox"><input type="checkbox" id="checkbox{{ record[0] }}" class="info-checkbox"></td>
+                            <td>{{ record[1] }}</td>
+                            <td class="td-point">{{ record[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <h2>加算</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="th-checkbox">選択</th>
+                            <th class="th-name">名称</th>
+                            <th class="th-point">点数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records_b %}
+                        <tr>
+                            <td class="td-checkbox"><input type="checkbox" id="checkbox{{ record[0] }}" class="info-checkbox"></td>
+                            <td>{{ record[1] }}</td>
+                            <td class="td-point">{{ record[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <h2>管理</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="th-checkbox">選択</th>
+                            <th class="th-name">名称</th>
+                            <th class="th-point">点数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records_c %}
+                        <tr>
+                            <td class="td-checkbox"><input type="checkbox" id="checkbox{{ record[0] }}" class="info-checkbox"></td>
+                            <td>{{ record[1] }}</td>
+                            <td class="td-point">{{ record[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="right-pane">
+            <div class="right-pane-inner">
+                <h2>選択されたアイテムの情報と点数
+                    <button class="reset_button" id="clear-selection" style="margin-left: 20px;">選択リセット</button>
+                </h2>
+                <div id="info-score-display"></div>
+                <div style="margin-top: 20px;">
+                    <label for="multiplier">数値を入力してください:</label>
+                    <input type="number" id="multiplier" name="multiplier" min="1" style="margin-left: 10px;">
+                    <button id="calculate-button" style="margin-left: 10px;">計算</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            $('.info-checkbox').change(function(){
+                updateSelectedInfo();
+            });
+
+            $('#clear-selection').click(function(){
+                $('.info-checkbox').prop('checked', false); 
+                updateSelectedInfo(); 
+            });
+
+            function updateSelectedInfo() {
+                let selectedIds = $('.info-checkbox:checked').map(function(){
+                    return this.id;
+                }).get();
+
+                $.ajax({
+                    url: '/get_info_and_scores',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ selected_ids: selectedIds }),
+                    success: function(data) {
+                        let infoScoreHtml = '';
+                        data.forEach(function(record) {
+                            infoScoreHtml += `<div class="info-record">
+                                                <div class="info-score">
+                                                    <div class="info">${record.info}</div>
+                                                    <div class="score">${record.point} 点</div>
+                                                </div>
+                                              </div>`;
+                        });
+                        $('#info-score-display').html(infoScoreHtml);
+                    }
+                });
+            }
+            $('#calculate-button').click(function() {
+                let multiplier = $('#multiplier').val();
+                if (multiplier === "") {
+                    alert("数値を入力してください。");
+                    return;
+                }
+
+                let selectedPoints = $('.info-checkbox:checked').map(function() {
+                    return parseInt($(this).closest('tr').find('.td-point').text(), 10);
+                }).get();
+
+                if (selectedPoints.length === 0) {
+                    alert("チェックボックスを選択してください。");
+                    return;
+                }
+
+                let results = selectedPoints.map(function(point) {
+                    return point * multiplier;
+                });
+
+                let resultUrl = '{{ url_for("result") }}?results=' + results.join(',');
+                window.open(resultUrl, '_blank');
+            });
+        });
+    </script>
+</body>
+</html>
