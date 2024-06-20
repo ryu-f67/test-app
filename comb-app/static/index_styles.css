@@ -100,8 +100,7 @@ a {
     height: 30%;
     width: 15%;
     position: fixed;
-    bottom: 0;
-
+    bottom: 7%;
 }
 
 .reset_button {
@@ -178,7 +177,7 @@ tbody tr:hover {
 
 .calculate-button {
     position: relative;
-    margin-top: 10%; 
+    margin-top: 20%; 
     left: 20%;
     padding: 10px 20px;
     background-color: #333;
