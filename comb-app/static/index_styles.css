@@ -6,6 +6,7 @@ html, body {
 }
 
 .navbar {
+    height: 5%;
     width: 100%;
     background-color: #333;
     color: #fff;
@@ -51,40 +52,61 @@ html, body {
     border-radius: 5px;
 }
 
-/* Main content styles */
-.container {
-    display: flex;
+a {
+    display: block;
+    text-decoration: none;
+    color: white;
+}
+
+.container{
+    display: table;
+    width: 100%;
+}
+.split-left-pane{
+    display: table-cell;
+    padding: 80px;
+    width: 50%;
+    background: #f9f9f9;
+    position: static;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.left-pane-inner{
     height: 100%;
-    margin-top: 60px; /* Add margin to account for the fixed navbar */
-}
-
-.left-pane, .right-pane {
-    flex: 1;
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-.left-pane {
-    border-right: 1px solid #ccc;
-    overflow-y: auto;
-}
-
-.left-pane-inner {
     position: static;
 }
 
-.right-pane {
-    background-color: #f9f9f9;
+.split-center-pane{
+    display: table-cell;
+    padding-top: 80px;
     padding-left: 20px;
+    height: 100%;
+    width: 35%;
+    position: static;
 }
-
-.right-pane-inner {
+.center-pane-inner{
     height: 100%;
     position: fixed;
 }
 
+.split-right-pane{
+    display: table-cell;
+    height: 100%;
+    width: 15%;
+    position: static;
+
+}
+.right-pane-inner{
+    height: 30%;
+    width: 15%;
+    position: fixed;
+    bottom: 0;
+
+}
+
 .reset_button {
     padding: 5px 10px;
+    margin-left: 20px;
     background-color: #333;
     color: #fff;
     border: none;
@@ -138,17 +160,46 @@ tbody tr:hover {
     background-color: #f0f0f0;
 }
 
+.fr-label {
+    position: relative;
+    top: 3%;
+    left: 5%;
+    font-size: 24px;
+}
+
+.fr-input {
+    position: relative;
+    top: 3%;
+    height: 40px;
+    width: 60px;
+    font-size: 24px;
+    margin-left: 7%;
+}
+
+.calculate-button {
+    position: relative;
+    margin-top: 10%; 
+    left: 20%;
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    font-size: 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 .info-checkbox {
     cursor: pointer;
 }
 
 #info-score-display {
-    display: flex;
+    display: static;
     flex-wrap: wrap;
 }
 
 .info-record {
-    width: 50%;
+    width: 90%;
     padding: 5px;
     margin-bottom: 5px;
 }
